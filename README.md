@@ -1,53 +1,300 @@
-# UniLogX - Log Management Platform
+# UniLogX - Advanced System Log Intelligence Platform
 
-A modern log collection and analysis platform for Windows and Linux systems with real-time log aggregation and a beautiful analytics dashboard.
+A comprehensive, cross-platform log collection and analysis system that provides real-time log aggregation from Windows Event Viewer and Linux system logs with an intuitive desktop dashboard for monitoring and analysis.
 
-## Features
+## 🎯 Overview
 
-✅ Real-time log collection from Windows Event Viewer and Linux system logs  
-✅ Streamlit-based web dashboard with analytics and visualizations  
-✅ Advanced filtering and search capabilities  
-✅ Log indexing and fast search  
-✅ Export functionality (CSV, JSON)  
-✅ Multi-OS support (Windows/Linux)  
+UniLogX is a dual-component application consisting of:
+- **Log Collection Agent**: Automatically collects system logs from Windows and Linux
+- **Desktop Dashboard**: Rich GUI for viewing, filtering, and analyzing collected logs
 
-## Quick Start
+## ✨ Features
+
+✅ **Real-time Log Collection**
+- Windows Event Logs (System, Security, Application, Setup)
+- Linux System Logs (syslog, auth, kernel, audit, cron)
+- Configurable collection intervals
+
+✅ **Cross-Platform Support**
+- Windows 10+ with Event Viewer integration
+- Linux (Ubuntu 18.04+) with syslog support
+- Automatic OS detection
+
+✅ **Advanced Dashboard**
+- Dark-themed CustomTkinter GUI (1600x900)
+- Real-time log filtering and search
+- Analytics and visualization capabilities
+- Log-level filtering (CRITICAL, ERROR, WARNING, INFO, DEBUG)
+
+✅ **Efficient Log Management**
+- JSON Lines format storage (ELK-like behavior)
+- Automatic log indexing
+- Fast search with cached data
+- Configurable log rotation (50MB per file, 1000 logs per file)
+
+✅ **Data Export**
+- CSV export functionality
+- JSON export support
+- Historical log access
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
 # Install dependencies
-pip install -r data/requirements.txt
-
-# Run the application
-python data/unilogx_main.py
+pip install -r requirements.txt
 ```
 
-Dashboard available at `http://localhost:8501`
+### Run the Application
 
-## Installation
-
-### Prerequisites
-- Python 3.8+
-- Windows 10+ or Linux (Ubuntu 18.04+)
-- 500MB disk space, 1GB RAM minimum
-- Administrator/sudo privileges recommended
-
-### Windows
+**Option 1: Start both agent and dashboard**
 ```bash
-cd path\to\UniLogX
-pip install -r data/requirements.txt
-python data/unilogx_main.py
+python agent/main_agent.py
 ```
 
-### Linux
+Then in another terminal:
 ```bash
-cd /path/to/UniLogX
-pip3 install -r data/requirements.txt
-sudo python3 data/unilogx_main.py
+python dashboard/dashboard_app.py
 ```
 
-## Architecture
+**Option 2: Run individually**
+
+Start the collection agent:
+```bash
+# Windows
+python agent/main_agent.py
+
+# Linux (requires sudo for full access)
+sudo python3 agent/main_agent.py
+```
+
+Start the dashboard:
+```bash
+python dashboard/dashboard_app.py
+```
+
+## 📋 Prerequisites
+
+- **Python**: 3.8+
+- **OS**: Windows 10+ OR Linux (Ubuntu 18.04+)
+- **Resources**: 
+  - Disk space: 500MB minimum
+  - RAM: 1GB minimum
+- **Privileges**: 
+  - Windows: Standard user (admin recommended for Security logs)
+  - Linux: sudo/root recommended for full syslog access
+
+## 📁 Project Structure
 
 ```
+UniLogX/
+├── agent/                    # Log collection agent
+│   ├── main_agent.py        # Main agent entry point
+│   ├── config.py            # Configuration settings
+│   ├── os_detector.py       # OS detection module
+│   ├── windows_logs.py      # Windows log collection
+│   ├── linux_logs.py        # Linux log collection
+│   ├── folder_manager.py    # Directory management
+│   ├── log_indexer.py       # Log indexing
+│   ├── alert_manager.py     # Alert management
+│   └── __pycache__/         # Python cache
+│
+├── dashboard/               # Desktop dashboard GUI
+│   ├── dashboard_app.py     # Main dashboard application
+│   └── dashboard_app_old.py # Legacy version
+│
+├── requirements.txt         # Python dependencies
+├── install.sh              # Installation script
+└── README.md               # This file
+```
+
+## ⚙️ Configuration
+
+Edit [agent/config.py](agent/config.py) to customize:
+
+```python
+COLLECTION_INTERVAL = 5              # Collection frequency (seconds)
+BASE_LOG_DIR = ~/Documents/UniLogX   # Log storage location
+MAX_LOGS_PER_FILE = 1000            # Logs per file
+LOG_ROTATION_SIZE = 50 * 1024 * 1024 # 50MB per file
+DASHBOARD_PORT = 8501               # Dashboard port
+DEBUG = True                         # Debug logging
+ENABLE_SEARCH = True                # Enable search
+ENABLE_ANALYTICS = True             # Enable analytics
+ENABLE_ALERTS = True                # Enable alerts
+```
+
+## 🔍 How It Works
+
+### 1. Log Collection Agent
+- Detects the operating system
+- Creates necessary folder structure
+- Collects logs at configured intervals
+- Indexes logs in JSON Lines format
+- Monitors for shutdown signals from dashboard
+
+### 2. Windows Log Collection
+- Uses PowerShell to query Event Logs
+- Collects from: System, Security, Application, Setup
+- Captures: timestamp, source, event ID, message, level
+- Stores 100 most recent events per collection cycle
+
+### 3. Linux Log Collection
+- Reads log files: syslog, auth.log, kern.log, audit.log, cron
+- Parses standard Linux log format
+- Auto-detects log levels (ERROR, WARNING, DEBUG)
+- Reads last 500 lines per file
+
+### 4. Desktop Dashboard
+- Loads and caches logs from index
+- Provides real-time filtering by:
+  - Log level (CRITICAL, ERROR, WARNING, INFO, DEBUG)
+  - Time range
+  - Search keywords
+  - Category/source
+- Displays analytics and statistics
+- Supports data export (CSV/JSON)
+
+## 📊 Log Data Format
+
+Logs are stored in JSON Lines format (one JSON object per line):
+
+```json
+{
+  "timestamp": "2026-01-31T15:30:45.123456",
+  "source": "Windows Update",
+  "event_id": "1",
+  "message": "System update installed",
+  "level": "INFO",
+  "category": "system",
+  "os_type": "windows",
+  "host": "COMPUTER-NAME"
+}
+```
+
+## 💾 Log Storage Location
+
+Logs are stored in your user Documents folder:
+- **Windows**: `C:\Users\[YourUsername]\Documents\UniLogX\Log\`
+- **Linux**: `~/Documents/UniLogX/Log/`
+
+Subdirectories by category:
+- `system/` - System events
+- `security/` - Security events
+- `application/` - Application events
+- `setup/` - Setup events
+- `syslog/` - Syslog messages
+- `auth/` - Authentication logs
+- `kernel/` - Kernel logs
+- `audit/` - Audit logs
+- `cron/` - Cron jobs
+
+## 🎮 Dashboard Controls
+
+The CustomTkinter dashboard provides:
+- **Top Search Bar**: Keyword search across all logs
+- **Filter Panel**: Filter by log level, time range, source
+- **Log Table**: View detailed log entries
+- **Statistics Panel**: Log count, distribution by level
+- **Export Buttons**: Download as CSV or JSON
+- **Refresh Button**: Manually refresh log data
+- **Shutdown Button**: Gracefully stop the collection agent
+
+## 🛑 Shutdown Process
+
+The dashboard sends a shutdown signal that gracefully stops the collection agent:
+1. Creates `shutdown.signal` file
+2. Agent detects the signal
+3. Agent closes cleanly
+4. Signal file is removed
+
+## 📦 Dependencies
+
+```
+customtkinter>=5.0.0      # Modern GUI framework
+pandas>=1.5.0             # Data manipulation
+numpy>=1.24.0             # Numerical computing
+python-dateutil>=2.8.0    # Date utilities
+pytz>=2023.0              # Timezone handling
+requests>=2.31.0          # HTTP client
+```
+
+## 🔐 Security Considerations
+
+- **Windows**: Some Security log entries require admin privileges
+- **Linux**: Many logs require sudo/root access
+- Logs are stored locally with standard file permissions
+- No data is sent to external services
+- Sensitive data in logs should be handled appropriately
+
+## 🐛 Troubleshooting
+
+### No logs appearing in dashboard
+- Ensure agent is running
+- Check log directory exists: `~/Documents/UniLogX/Log/`
+- Verify permissions (admin/sudo if needed)
+- Enable DEBUG mode in config.py
+
+### Windows Event Log errors
+- Run as Administrator or with elevated privileges
+- Verify Event Log service is running
+- Check Windows Firewall settings
+
+### Linux log permission denied
+- Use `sudo python3 agent/main_agent.py`
+- Ensure read permissions on `/var/log/`
+- Check user group memberships
+
+### Dashboard not loading logs
+- Verify log index file exists
+- Check JSON format in log files
+- Clear cache or restart dashboard
+
+## 📝 Notes
+
+- Collection is non-blocking; keyboard interrupt pauses collection
+- Agent continues running unless explicitly stopped or shutdown signal received
+- Dashboard caches logs to improve performance
+- Log indexing happens in real-time during collection
+
+## 🔄 Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│          System Logs (Windows/Linux)            │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+        ┌──────────────────────┐
+        │  Log Collection Agent │
+        │  (main_agent.py)     │
+        └──────────┬───────────┘
+                   │
+      ┌────────────┼────────────┐
+      │            │            │
+      ▼            ▼            ▼
+  ┌────────┐  ┌────────┐  ┌──────────┐
+  │Windows │  │ Linux  │  │   Logs   │
+  │Parser  │  │Parser  │  │  Index   │
+  └────────┘  └────────┘  └──────────┘
+      │            │            │
+      └────────────┼────────────┘
+                   │
+                   ▼
+        ┌──────────────────────┐
+        │  Desktop Dashboard   │
+        │ (dashboard_app.py)   │
+        └──────────────────────┘
+```
+
+## 📄 License
+
+Refer to your project's license file for details.
+
+## 🤝 Support
+
+For issues or feature requests, check the agent and dashboard log outputs for diagnostic information.
 UniLogX/
 ├── agent/                      # Log collection backend
 │   ├── main_agent.py
