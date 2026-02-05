@@ -448,22 +448,6 @@ To contribute:
 
 MIT License - Free for commercial and private use
 
-## Changelog
-
-### v2.0.1 (January 30, 2026)
-- Enhanced dashboard with advanced search
-- Linux journalctl integration
-- CSV/JSON export, real-time streaming
-
-### v2.0 (December 15, 2025)
-- Streamlit redesign
-- JSON-based log format
-- Cross-platform support
-
-### v1.0 (October 1, 2025)
-- Initial release
-- Basic log collection and dashboard
-
 ---
 
 **Version**: 2.0.1 | **Status**: Production Ready ✅  
